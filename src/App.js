@@ -1,5 +1,6 @@
 
 import Wave from "./Wave";
+
 function App() {
   return (
     <>

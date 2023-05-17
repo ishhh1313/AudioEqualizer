@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import town from "./town-10169.mp3";
 
-function Wave() {
+function Waveform() {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [midValue, setMidValue] = useState(0);
@@ -18,7 +18,7 @@ function Wave() {
       backend: "WebAudio", // Use Web Audio backend for audio manipulation
     });
 
-    // Load audio file
+    // Load default audio file
     wavesurfer.current.load(town);
 
     return () => {
@@ -58,7 +58,6 @@ function Wave() {
       eqNode2.connect(eqNode3);
       eqNode3.connect(audioContext.destination);
     }
-    // Connect the nodes
   };
 
   // Event handler for mid input change
@@ -78,6 +77,16 @@ function Wave() {
     const value = parseInt(event.target.value);
     setTrebleValue(value);
   };
+
+  // Event handler for file selection
+  // Event handler for file selection
+const handleFileSelect = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    wavesurfer.current.loadBlob(file);
+  }
+};
+
 
   // Event handler for play button click
   const handlePlay = () => {
@@ -111,7 +120,6 @@ function Wave() {
       </div>
       <div>
         <label htmlFor="bass">Bass:</label>
-
         <input
           type="range"
           id="bass"
@@ -121,7 +129,6 @@ function Wave() {
           onChange={handleBassChange}
         />
       </div>
-
       <div>
         <label htmlFor="treble">Treble:</label>
         <input
@@ -133,9 +140,12 @@ function Wave() {
           onChange={handleTrebleChange}
         />
       </div>
-
+      <div>
+        <input type="file" accept="audio/*" onChange={handleFileSelect} />
+      </div>
       <button onClick={handlePlay}>{isPlaying ? "Pause" : "Play"}</button>
     </div>
   );
 }
-export default Wave;
+
+export default Waveform;
