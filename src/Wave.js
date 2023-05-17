@@ -2,23 +2,22 @@ import React, { useRef, useEffect, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import town from "./town-10169.mp3";
 
-function Waveform() {
+function Wave() {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [midValue, setMidValue] = useState(0);
   const [bassValue, setBassValue] = useState(0);
   const [trebleValue, setTrebleValue] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioRate, setAudioRate] = useState(1);
 
   useEffect(() => {
     wavesurfer.current = WaveSurfer.create({
       container: waveformRef.current,
       waveColor: "violet",
       progressColor: "purple",
-      backend: "WebAudio", // Use Web Audio backend for audio manipulation
+      backend: "WebAudio", 
     });
-
-    // Load default audio file
     wavesurfer.current.load(town);
 
     return () => {
@@ -26,19 +25,15 @@ function Waveform() {
     };
   }, []);
 
-  // Function to update the equalizer settings
   const updateEqualizer = () => {
-    const audioContext = wavesurfer.current.backend.getAudioContext();
+    const audioContext = wavesurfer.current.backend.ac;
     const source = wavesurfer.current.backend.source;
 
-    // Create the equalizer nodes
     if (audioContext && source) {
-      // Create the equalizer nodes
       const eqNode1 = audioContext.createBiquadFilter();
       const eqNode2 = audioContext.createBiquadFilter();
       const eqNode3 = audioContext.createBiquadFilter();
 
-      // Configure the equalizer nodes
       eqNode1.type = "peaking";
       eqNode1.frequency.value = 1000;
       eqNode1.gain.value = midValue;
@@ -51,7 +46,6 @@ function Waveform() {
       eqNode3.frequency.value = 8000;
       eqNode3.gain.value = trebleValue;
 
-      // Connect the nodes
       source.disconnect();
       source.connect(eqNode1);
       eqNode1.connect(eqNode2);
@@ -60,35 +54,28 @@ function Waveform() {
     }
   };
 
-  // Event handler for mid input change
   const handleMidChange = (event) => {
     const value = parseInt(event.target.value);
     setMidValue(value);
   };
 
-  // Event handler for bass input change
   const handleBassChange = (event) => {
     const value = parseInt(event.target.value);
     setBassValue(value);
   };
 
-  // Event handler for treble input change
   const handleTrebleChange = (event) => {
     const value = parseInt(event.target.value);
     setTrebleValue(value);
   };
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      wavesurfer.current.loadBlob(file);
+    }
+  };
+  
 
-  // Event handler for file selection
-  // Event handler for file selection
-const handleFileSelect = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    wavesurfer.current.loadBlob(file);
-  }
-};
-
-
-  // Event handler for play button click
   const handlePlay = () => {
     setIsPlaying(!isPlaying);
     if (isPlaying) {
@@ -98,8 +85,13 @@ const handleFileSelect = (event) => {
     }
   };
 
+  const handleAudioRateChange = (event) => {
+    const value = parseFloat(event.target.value);
+    setAudioRate(value);
+    wavesurfer.current.setPlaybackRate(value); 
+  };
+
   useEffect(() => {
-    // Update the equalizer settings when mid, bass, or treble values change
     updateEqualizer();
   }, [midValue, bassValue, trebleValue]);
 
@@ -141,6 +133,18 @@ const handleFileSelect = (event) => {
         />
       </div>
       <div>
+        <label htmlFor="audioRate">Audio Rate:</label>
+        <input
+          type="number"
+          id="audioRate"
+          min="0.5"
+          max="3 "
+          step="0.1"
+          value={audioRate}
+          onChange={handleAudioRateChange}
+        />
+      </div>
+      <div>
         <input type="file" accept="audio/*" onChange={handleFileSelect} />
       </div>
       <button onClick={handlePlay}>{isPlaying ? "Pause" : "Play"}</button>
@@ -148,4 +152,4 @@ const handleFileSelect = (event) => {
   );
 }
 
-export default Waveform;
+export default Wave;
